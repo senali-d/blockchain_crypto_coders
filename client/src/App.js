@@ -8,7 +8,8 @@ import "./App.css";
 const App = () => {
   const [contract, setContract] = useState(null);
   const [account, setAccount] = useState("");
-  const [coders, setCoders] = useState([])
+  const [coders, setCoders] = useState([]);
+  const [mintText, setMintText] = useState("");
 
   const loadNFTS = async (contract) => {
     const totalSupply = await contract.methods.totalSupply().call()
@@ -47,6 +48,16 @@ const App = () => {
     await loadNFTS(contract)
   }, [])
 
+  const mint = () => {
+    contract.methods.mint(mintText).send({ from: account }, (error) => {
+      console.log("worked")
+      if(!error) {
+        setCoders([...coders, mintText])
+        setMintText("")
+      }
+    });
+  }
+
   return (
     <div>
       <nav className="navbar navbar-light bg-light px-4">
@@ -64,14 +75,16 @@ const App = () => {
               <input 
                 type="text"
                 className="form-control mb-2"
+                value={mintText}
+                onChange={(e) => setMintText(e.target.value)}
                 placeholder="e.g. Naz" />
-              <button className="btn btn-primary">Mint</button>
+              <button onClick={mint} className="btn btn-primary">Mint</button>
             </div>
           </div>
           <div className="col-8 d-flex justify-content-center flex-wrap">
             {
               coders.map((coder, key) => (
-                <div className="d-flex flex-column align-items-center">
+                <div key={key} className="d-flex flex-column align-items-center">
                   <img width="150" src={`https://avatars.dicebear.com/api/pixel-art/${coder}.svg`} />
                   <span>{coder}</span>
                 </div>
