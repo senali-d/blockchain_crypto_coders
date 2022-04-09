@@ -8,6 +8,17 @@ import "./App.css";
 const App = () => {
   const [contract, setContract] = useState(null);
   const [account, setAccount] = useState("");
+  const [coders, setCoders] = useState([])
+
+  const loadNFTS = async (contract) => {
+    const totalSupply = await contract.methods.totalSupply().call()
+    let nfts = [];
+    for (let i = 0; i < totalSupply; i++) {
+      let coder = await contract.methods.coders(i).call();
+      nfts.push(coder)
+    }
+    setCoders(nfts);
+  }
 
   const loadWeb3Account = async (web3) => {
     const accounts = await web3.eth.getAccounts();
@@ -32,14 +43,15 @@ const App = () => {
   useEffect(async() => {
     const web3 = await getWeb3()
     await loadWeb3Account(web3)
-    await loadWeb3Contract(web3)
+    let contract = await loadWeb3Contract(web3)
+    await loadNFTS(contract)
   }, [])
 
   return (
     <div>
       <nav className="navbar navbar-light bg-light px-4">
         <a className="navbar-brand" href="#">Crypto Coders</a>
-        <span>Name</span>
+        <span>{account}</span>
       </nav>
       <div className="container-fluid mt-5">
       <div className="row">
@@ -57,10 +69,14 @@ const App = () => {
             </div>
           </div>
           <div className="col-8 d-flex justify-content-center flex-wrap">
-            <div className="d-flex flex-column align-items-center">
-              <img width="150" src={`https://avatars.dicebear.com/api/pixel-art/naz.svg`} />
-              <span>coder</span>
-            </div>
+            {
+              coders.map((coder, key) => (
+                <div className="d-flex flex-column align-items-center">
+                  <img width="150" src={`https://avatars.dicebear.com/api/pixel-art/${coder}.svg`} />
+                  <span>{coder}</span>
+                </div>
+              ))
+            }
           </div>
         </div>
       </div>
